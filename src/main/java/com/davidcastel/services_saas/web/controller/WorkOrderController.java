@@ -32,4 +32,23 @@ public class WorkOrderController {
         return workOrderService.create(workOrderRequest);
     }
 
+    @PatchMapping("/{id}/start")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void start(@PathVariable Long id) {
+        workOrderService.start(id);
+    }
+
+    @PatchMapping("/{id}/complete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void complete(@PathVariable Long id) {
+        workOrderService.complete(id);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public void cancelWorkOrder(@PathVariable Long id) {
+        workOrderService.cancel(id);
+    }
+
+
+
 }

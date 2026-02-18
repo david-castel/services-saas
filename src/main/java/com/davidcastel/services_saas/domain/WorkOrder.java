@@ -1,5 +1,6 @@
 package com.davidcastel.services_saas.domain;
 
+import com.davidcastel.services_saas.domain.exception.InvalidWorkOrderStateException;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -77,7 +78,35 @@ public class WorkOrder {
         return customer;
     }
 
-    public void changeStatus(OrderStatus newStatus) {
-        this.status = newStatus;
+//    public void changeStatus(OrderStatus newStatus) {
+//        this.status = newStatus;
+//    }
+
+    public void start() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new IllegalStateException("Only PENDING orders can be started");
+        }
+
+        this.status = OrderStatus.IN_PROGRESS;
     }
+
+    public void complete() {
+        if (this.status != OrderStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Only IN_PROGRESS orders can be completed");
+        }
+
+        this.status = OrderStatus.COMPLETED;
+    }
+
+    public void cancel() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new InvalidWorkOrderStateException(
+                    "Only PENDING orders can be cancelled"
+            );
+        }
+
+        this.status = OrderStatus.CANCELLED;
+    }
+
+
 }

@@ -49,4 +49,29 @@ public class WorkOrderService {
         );
     }
 
+    @Transactional
+    public void start(Long id) {
+        WorkOrder wo = workOrderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Work order not found"));
+
+        wo.start();
+    }
+
+    @Transactional
+    public void complete(Long id) {
+        WorkOrder wo = workOrderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Work order not found"));
+
+        wo.complete();
+    }
+
+
+    @Transactional
+    public void cancel(Long id) {
+        WorkOrder wo = workOrderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Work order not found"));
+
+        wo.cancel();
+    }
+
 }

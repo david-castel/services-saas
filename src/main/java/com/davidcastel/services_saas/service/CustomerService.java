@@ -1,6 +1,8 @@
 package com.davidcastel.services_saas.service;
 
 import com.davidcastel.services_saas.domain.Customer;
+import com.davidcastel.services_saas.domain.exception.DuplicateEmailException;
+import com.davidcastel.services_saas.domain.exception.ResourceNotFoundException;
 import com.davidcastel.services_saas.repository.CustomerRepository;
 import com.davidcastel.services_saas.web.dto.CreateCustomerRequest;
 import com.davidcastel.services_saas.web.dto.CustomerResponse;
@@ -28,21 +30,23 @@ public class CustomerService {
     public CustomerResponse create(CreateCustomerRequest customerRequest) {
         if (customerRequest.email() != null && !customerRequest.email().isBlank()
                 && customerRepository.existsByEmail(customerRequest.email())) {
-            throw new IllegalArgumentException("Email already in use.");
+            throw new DuplicateEmailException("Email already in use.");
         }
 
-        Customer newCustomer = new Customer(customerRequest.name(), customerRequest.email(),
-                customerRequest.phone(), customerRequest.address());
-
-        Customer savedCustomer = customerRepository.save(newCustomer);
-
-        return toResponse(savedCustomer);
+        try {
+            Customer customer = new Customer(customerRequest.name(), blankToNull(customerRequest.email()), blankToNull(customerRequest.phone()), blankToNull(customerRequest.address()));
+            Customer saved = customerRepository.save(customer);
+            return toResponse(saved);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // respaldo ante concurrencia (race condition) o constraint DB
+            throw new DuplicateEmailException("Email already in use");
+        }
     }
 
     @Transactional(readOnly = true)
     public CustomerResponse getById(Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
 
         return toResponse(customer);
     }
@@ -56,11 +60,11 @@ public class CustomerService {
 
     public CustomerResponse update(Long id, UpdateCustomerRequest customerRequest) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
 
         String email = blankToNull(customerRequest.email());
         if (email != null && !email.equals(customer.getEmail()) && customerRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new DuplicateEmailException("Email already in use");
         }
 
         customer.update(customerRequest.name(), email, blankToNull(customerRequest.phone()), blankToNull(customerRequest.address()));
@@ -71,7 +75,7 @@ public class CustomerService {
 
     public void delete(Long id) {
         if (!customerRepository.existsById(id)) {
-            throw new IllegalArgumentException("Customer not found: " + id);
+            throw new ResourceNotFoundException("Customer not found: " + id);
         }
 
         customerRepository.deleteById(id);

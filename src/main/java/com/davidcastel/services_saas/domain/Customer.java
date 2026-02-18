@@ -6,7 +6,8 @@ import jakarta.persistence.*;
  * Entity Customer (JPA)
  */
 @Entity
-@Table(name = "customers")
+@Table(name = "customers",
+        uniqueConstraints = @UniqueConstraint(name = "uk_customers_email", columnNames = "email"))
 public class Customer {
 
     @Id
@@ -16,7 +17,7 @@ public class Customer {
     @Column(nullable = false, length = 120)
     private String name;
 
-    @Column(length = 160)
+    @Column(unique = true, length = 160)
     private String email;
 
     @Column(length = 30)
