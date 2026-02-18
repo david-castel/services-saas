@@ -16,14 +16,14 @@ import java.net.URI;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        pd.setTitle("Bad request");
-        pd.setDetail(ex.getMessage());
-        pd.setInstance(URI.create(request.getRequestURI()));
-        return pd;
-    }
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+//        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+//        pd.setTitle("Bad request");
+//        pd.setDetail(ex.getMessage());
+//        pd.setInstance(URI.create(request.getRequestURI()));
+//        return pd;
+//    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -31,17 +31,24 @@ public class ApiExceptionHandler {
         pd.setTitle("Validation failed");
         pd.setDetail("Request validation failed");
         pd.setInstance(URI.create(request.getRequestURI()));
+
+        var errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .toList();
+
+        pd.setProperty("errors", errors);
+
         return pd;
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        pd.setTitle("Invalid state transition");
-        pd.setDetail(ex.getMessage());
-        pd.setInstance(URI.create(request.getRequestURI()));
-        return pd;
-    }
+//    @ExceptionHandler(IllegalStateException.class)
+//    public ProblemDetail handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
+//        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+//        pd.setTitle("Invalid state transition");
+//        pd.setDetail(ex.getMessage());
+//        pd.setInstance(URI.create(request.getRequestURI()));
+//        return pd;
+//    }
 
     @ExceptionHandler(InvalidWorkOrderStateException.class)
     public ProblemDetail handleInvalidState(
@@ -84,7 +91,7 @@ public class ApiExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request) {
 
-        String message = "Data integrity violation";
+        String message = "Duplicate resource";
 
         Throwable violation = findCause(ex, org.hibernate.exception.ConstraintViolationException.class);
 

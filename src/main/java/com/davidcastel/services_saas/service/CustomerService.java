@@ -7,6 +7,7 @@ import com.davidcastel.services_saas.repository.CustomerRepository;
 import com.davidcastel.services_saas.web.dto.CreateCustomerRequest;
 import com.davidcastel.services_saas.web.dto.CustomerResponse;
 import com.davidcastel.services_saas.web.dto.UpdateCustomerRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -28,19 +29,20 @@ public class CustomerService {
     }
 
     public CustomerResponse create(CreateCustomerRequest customerRequest) {
-        if (customerRequest.email() != null && !customerRequest.email().isBlank()
-                && customerRepository.existsByEmail(customerRequest.email())) {
+        String email = blankToNull(customerRequest.email());
+
+        if (email != null && customerRepository.existsByEmail(email)) {
             throw new DuplicateEmailException("Email already in use.");
         }
 
-        try {
+//        try {
             Customer customer = new Customer(customerRequest.name(), blankToNull(customerRequest.email()), blankToNull(customerRequest.phone()), blankToNull(customerRequest.address()));
             Customer saved = customerRepository.save(customer);
             return toResponse(saved);
-        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
-            // respaldo ante concurrencia (race condition) o constraint DB
-            throw new DuplicateEmailException("Email already in use");
-        }
+//        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+//            // respaldo ante concurrencia (race condition) o constraint DB
+//            throw new DuplicateEmailException("Email already in use");
+//        }
     }
 
     @Transactional(readOnly = true)
@@ -67,10 +69,18 @@ public class CustomerService {
             throw new DuplicateEmailException("Email already in use");
         }
 
-        customer.update(customerRequest.name(), email, blankToNull(customerRequest.phone()), blankToNull(customerRequest.address()));
+//        try {
+            customer.update(customerRequest.name(), email, blankToNull(customerRequest.phone()), blankToNull(customerRequest.address()));
 
-        return toResponse(customer);
+            // No hace falta save()
+            // JPA hará dirty checking al cerrar la transacción
 
+            return toResponse(customer);
+
+//        } catch (DataIntegrityViolationException ex) {
+//            // respaldo ante race condition
+//            throw new DuplicateEmailException("Email already in use");
+//        }
     }
 
     public void delete(Long id) {

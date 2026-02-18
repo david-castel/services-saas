@@ -84,7 +84,7 @@ public class WorkOrder {
 
     public void start() {
         if (this.status != OrderStatus.PENDING) {
-            throw new IllegalStateException("Only PENDING orders can be started");
+            throw new InvalidWorkOrderStateException("Only PENDING orders can be started");
         }
 
         this.status = OrderStatus.IN_PROGRESS;
@@ -92,7 +92,7 @@ public class WorkOrder {
 
     public void complete() {
         if (this.status != OrderStatus.IN_PROGRESS) {
-            throw new IllegalStateException("Only IN_PROGRESS orders can be completed");
+            throw new InvalidWorkOrderStateException("Only IN_PROGRESS orders can be completed");
         }
 
         this.status = OrderStatus.COMPLETED;

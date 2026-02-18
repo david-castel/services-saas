@@ -2,6 +2,7 @@ package com.davidcastel.services_saas.service;
 
 import com.davidcastel.services_saas.domain.Customer;
 import com.davidcastel.services_saas.domain.WorkOrder;
+import com.davidcastel.services_saas.domain.exception.ResourceNotFoundException;
 import com.davidcastel.services_saas.repository.CustomerRepository;
 import com.davidcastel.services_saas.repository.WorkOrderRepository;
 import com.davidcastel.services_saas.web.dto.CreateWorkOrderRequest;
@@ -32,7 +33,7 @@ public class WorkOrderService {
     @Transactional
     public WorkOrderResponse create(CreateWorkOrderRequest workOrderRequest) {
         Customer customer = customerRepository.findById(workOrderRequest.customerId())
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + workOrderRequest.customerId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + workOrderRequest.customerId()));
 
         WorkOrder wo = new WorkOrder(workOrderRequest.title(), workOrderRequest.description(), workOrderRequest.scheduledDate(), customer);
         WorkOrder saved = workOrderRepository.save(wo);
@@ -52,7 +53,7 @@ public class WorkOrderService {
     @Transactional
     public void start(Long id) {
         WorkOrder wo = workOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Work order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Work order not found"));
 
         wo.start();
     }
@@ -60,7 +61,7 @@ public class WorkOrderService {
     @Transactional
     public void complete(Long id) {
         WorkOrder wo = workOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Work order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Work order not found"));
 
         wo.complete();
     }
@@ -69,7 +70,7 @@ public class WorkOrderService {
     @Transactional
     public void cancel(Long id) {
         WorkOrder wo = workOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Work order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Work order not found"));
 
         wo.cancel();
     }
