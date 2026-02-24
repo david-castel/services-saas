@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 public record CreateWorkOrderRequest(
         @NotBlank @Size(max = 150) String title,
-        @Size(max = 1000) String description,
+        @NotBlank @Size(max = 1000) String description,
         @NotNull @FutureOrPresent LocalDate scheduledDate,
         @NotNull Long customerId
 ) {

@@ -10,8 +10,11 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -121,6 +124,32 @@ public class ApiExceptionHandler {
         }
 
         return null;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Bad request");
+
+        String param = ex.getName(); // "status"
+        Object value = ex.getValue(); // "INVALID"
+        String expected = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "required type";
+
+        pd.setDetail("Invalid value '" + value + "' for parameter '" + param + "'. Expected " + expected + ".");
+        pd.setInstance(URI.create(request.getRequestURI()));
+
+        // opcional: meter info estructurada
+        pd.setProperty("parameter", param);
+        pd.setProperty("rejectedValue", value);
+        pd.setProperty("expectedType", expected);
+
+        if (ex.getRequiredType() != null && ex.getRequiredType().isEnum()) {
+            Object[] constants = ex.getRequiredType().getEnumConstants();
+            List<String> allowed = Arrays.stream(constants).map(Object::toString).toList();
+            pd.setProperty("allowedValues", allowed);
+        }
+
+        return pd;
     }
 
 }

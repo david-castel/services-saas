@@ -1,9 +1,12 @@
 package com.davidcastel.services_saas.web.controller;
 
+import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.service.CustomerService;
+import com.davidcastel.services_saas.service.WorkOrderService;
 import com.davidcastel.services_saas.web.dto.CreateCustomerRequest;
 import com.davidcastel.services_saas.web.dto.CustomerResponse;
 import com.davidcastel.services_saas.web.dto.UpdateCustomerRequest;
+import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +18,11 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final WorkOrderService workOrderService;
 
-    public CustomerController(CustomerService customerService) {
+    public CustomerController(CustomerService customerService, WorkOrderService workOrderService) {
         this.customerService = customerService;
+        this.workOrderService = workOrderService;
     }
 
     @PostMapping
@@ -45,6 +50,15 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         customerService.delete(id);
+    }
+
+    @GetMapping("/{id}/work-orders")
+    @ResponseStatus(HttpStatus.OK)
+    public List<WorkOrderListItemResponse> listWorkOrdersByCustomer(
+            @PathVariable("id") Long customerId,
+            @RequestParam(required = false) OrderStatus status
+    ) {
+        return workOrderService.listItems(status, customerId);
     }
 
 }

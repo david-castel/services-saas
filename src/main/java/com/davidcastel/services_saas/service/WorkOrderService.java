@@ -1,6 +1,7 @@
 package com.davidcastel.services_saas.service;
 
 import com.davidcastel.services_saas.domain.Customer;
+import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.domain.WorkOrder;
 import com.davidcastel.services_saas.domain.exception.ResourceNotFoundException;
 import com.davidcastel.services_saas.repository.CustomerRepository;
@@ -26,8 +27,26 @@ public class WorkOrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkOrderListItemResponse> listItems() {
-        return workOrderRepository.listItems();
+    public List<WorkOrderListItemResponse> listItems(OrderStatus status, Long customerId) {
+        List<WorkOrder> orders;
+
+        if (customerId != null && !customerRepository.existsById(customerId)) {
+            throw new ResourceNotFoundException("Customer not found: " + customerId);
+        }
+
+        if (status != null && customerId != null) {
+            orders = workOrderRepository.findByStatusAndCustomerId(status, customerId);
+        } else if (status != null) {
+            orders = workOrderRepository.findByStatus(status);
+        } else if (customerId != null) {
+            orders = workOrderRepository.findByCustomerId(customerId);
+        } else {
+            orders = workOrderRepository.findAll();
+        }
+
+        return orders.stream()
+                .map(this::toListItem)
+                .toList();
     }
 
     @Transactional
@@ -73,6 +92,16 @@ public class WorkOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Work order not found"));
 
         wo.cancel();
+    }
+
+    private WorkOrderListItemResponse toListItem(WorkOrder wo) {
+        return new WorkOrderListItemResponse(
+                wo.getId(),
+                wo.getTitle(),
+                wo.getStatus(),
+                wo.getScheduledDate(),
+                wo.getCustomer().getName()
+        );
     }
 
 }

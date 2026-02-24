@@ -1,12 +1,14 @@
 package com.davidcastel.services_saas.service;
 
 import com.davidcastel.services_saas.domain.Customer;
+import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.domain.exception.DuplicateEmailException;
 import com.davidcastel.services_saas.domain.exception.ResourceNotFoundException;
 import com.davidcastel.services_saas.repository.CustomerRepository;
 import com.davidcastel.services_saas.web.dto.CreateCustomerRequest;
 import com.davidcastel.services_saas.web.dto.CustomerResponse;
 import com.davidcastel.services_saas.web.dto.UpdateCustomerRequest;
+import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.constraints.Email;
@@ -101,6 +103,5 @@ public class CustomerService {
     private CustomerResponse toResponse(Customer customer) {
         return new CustomerResponse(customer.getId(), customer.getName(), customer.getEmail(), customer.getPhone(), customer.getAddress());
     }
-
 
 }

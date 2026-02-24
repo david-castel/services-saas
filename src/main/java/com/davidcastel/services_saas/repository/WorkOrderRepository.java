@@ -1,5 +1,6 @@
 package com.davidcastel.services_saas.repository;
 
+import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.domain.WorkOrder;
 import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,14 +10,20 @@ import java.util.List;
 
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
-    @Query("""
-        select new com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse(
-            wo.id, wo.title, wo.status, wo.scheduledDate, c.name
-        )
-        from WorkOrder wo
-        join wo.customer c
-        order by wo.createdAt desc
-    """)
-    public List<WorkOrderListItemResponse> listItems();
+//    @Query("""
+//        select new com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse(
+//            wo.id, wo.title, wo.status, wo.scheduledDate, c.name
+//        )
+//        from WorkOrder wo
+//        join wo.customer c
+//        order by wo.createdAt desc
+//    """)
+//    public List<WorkOrderListItemResponse> listItems();
+
+    List<WorkOrder> findByStatus(OrderStatus status);
+
+    List<WorkOrder> findByCustomerId(Long customerId);
+
+    List<WorkOrder> findByStatusAndCustomerId(OrderStatus status, Long customerId);
 
 }

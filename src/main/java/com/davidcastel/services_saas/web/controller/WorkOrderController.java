@@ -1,10 +1,13 @@
 package com.davidcastel.services_saas.web.controller;
 
+import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.repository.WorkOrderRepository;
 import com.davidcastel.services_saas.service.WorkOrderService;
 import com.davidcastel.services_saas.web.dto.CreateWorkOrderRequest;
 import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import com.davidcastel.services_saas.web.dto.WorkOrderResponse;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +25,16 @@ public class WorkOrderController {
     }
 
     @GetMapping
-    public List<WorkOrderListItemResponse> listItems() {
-        return workOrderService.listItems();
+    public List<WorkOrderListItemResponse> listItems(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long customerId
+    ) {
+        return workOrderService.listItems(status, customerId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public WorkOrderResponse createWorkOrder(CreateWorkOrderRequest workOrderRequest) {
+    public WorkOrderResponse create(@Valid @RequestBody CreateWorkOrderRequest workOrderRequest) {
         return workOrderService.create(workOrderRequest);
     }
 
@@ -45,10 +51,10 @@ public class WorkOrderController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public void cancelWorkOrder(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancel(@PathVariable Long id) {
         workOrderService.cancel(id);
     }
-
 
 
 }
