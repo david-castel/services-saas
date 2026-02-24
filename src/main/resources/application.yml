@@ -9,7 +9,20 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
   h2:
     console:
       enabled: true
+
+  profiles:
+    active: dev
+
+# Desactivar en PRO:
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+

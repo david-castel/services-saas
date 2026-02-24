@@ -3,6 +3,9 @@ package com.davidcastel.services_saas.repository;
 import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.domain.WorkOrder;
 import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -20,10 +23,17 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 //    """)
 //    public List<WorkOrderListItemResponse> listItems();
 
-    List<WorkOrder> findByStatus(OrderStatus status);
+    @Override
+    @EntityGraph(attributePaths = "customer")
+    Page<WorkOrder> findAll(Pageable pageable);
 
-    List<WorkOrder> findByCustomerId(Long customerId);
+    @EntityGraph(attributePaths = "customer")   // Para traer el customer en la query.
+    Page<WorkOrder> findByStatus(OrderStatus status, Pageable pageable);
 
-    List<WorkOrder> findByStatusAndCustomerId(OrderStatus status, Long customerId);
+    @EntityGraph(attributePaths = "customer")
+    Page<WorkOrder> findByCustomerId(Long customerId, Pageable pageable);
+
+    @EntityGraph(attributePaths = "customer")
+    Page<WorkOrder> findByStatusAndCustomerId(OrderStatus status, Long customerId, Pageable pageable);
 
 }

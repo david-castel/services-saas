@@ -8,6 +8,9 @@ import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import com.davidcastel.services_saas.web.dto.WorkOrderResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +28,12 @@ public class WorkOrderController {
     }
 
     @GetMapping
-    public List<WorkOrderListItemResponse> listItems(
+    public Page<WorkOrderListItemResponse> listItems(
             @RequestParam(required = false) OrderStatus status,
-            @RequestParam(required = false) Long customerId
+            @RequestParam(required = false) Long customerId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return workOrderService.listItems(status, customerId);
+        return workOrderService.listItems(status, customerId, pageable);
     }
 
     @PostMapping

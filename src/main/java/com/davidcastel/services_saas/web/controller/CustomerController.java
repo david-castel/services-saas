@@ -8,6 +8,9 @@ import com.davidcastel.services_saas.web.dto.CustomerResponse;
 import com.davidcastel.services_saas.web.dto.UpdateCustomerRequest;
 import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,11 +57,12 @@ public class CustomerController {
 
     @GetMapping("/{id}/work-orders")
     @ResponseStatus(HttpStatus.OK)
-    public List<WorkOrderListItemResponse> listWorkOrdersByCustomer(
+    public Page<WorkOrderListItemResponse> listWorkOrdersByCustomer(
             @PathVariable("id") Long customerId,
-            @RequestParam(required = false) OrderStatus status
+            @RequestParam(required = false) OrderStatus status,
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        return workOrderService.listItems(status, customerId);
+        return workOrderService.listItems(status, customerId, pageable);
     }
 
 }

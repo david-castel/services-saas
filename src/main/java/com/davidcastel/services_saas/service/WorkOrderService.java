@@ -9,6 +9,8 @@ import com.davidcastel.services_saas.repository.WorkOrderRepository;
 import com.davidcastel.services_saas.web.dto.CreateWorkOrderRequest;
 import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
 import com.davidcastel.services_saas.web.dto.WorkOrderResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,26 +29,28 @@ public class WorkOrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkOrderListItemResponse> listItems(OrderStatus status, Long customerId) {
-        List<WorkOrder> orders;
+    public Page<WorkOrderListItemResponse> listItems(
+            OrderStatus status,
+            Long customerId,
+            Pageable pageable) {
+
+        Page<WorkOrder> page;
 
         if (customerId != null && !customerRepository.existsById(customerId)) {
             throw new ResourceNotFoundException("Customer not found: " + customerId);
         }
 
         if (status != null && customerId != null) {
-            orders = workOrderRepository.findByStatusAndCustomerId(status, customerId);
+            page = workOrderRepository.findByStatusAndCustomerId(status, customerId, pageable);
         } else if (status != null) {
-            orders = workOrderRepository.findByStatus(status);
+            page = workOrderRepository.findByStatus(status, pageable);
         } else if (customerId != null) {
-            orders = workOrderRepository.findByCustomerId(customerId);
+            page = workOrderRepository.findByCustomerId(customerId, pageable);
         } else {
-            orders = workOrderRepository.findAll();
+            page = workOrderRepository.findAll(pageable);
         }
 
-        return orders.stream()
-                .map(this::toListItem)
-                .toList();
+        return page.map(this::toListItem);
     }
 
     @Transactional
