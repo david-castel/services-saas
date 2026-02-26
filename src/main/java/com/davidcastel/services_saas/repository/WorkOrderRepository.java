@@ -36,4 +36,17 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
     @EntityGraph(attributePaths = "customer")
     Page<WorkOrder> findByStatusAndCustomerId(OrderStatus status, Long customerId, Pageable pageable);
 
+    @Query("""
+        select wo.status as status, count(wo.id) as cnt
+        from WorkOrder wo
+        where wo.customer.id = :customerId
+        group by wo.status
+    """)
+    List<WorkOrderStatusCountProjection> countByStatusForCustomer(Long customerId);
+
+    interface WorkOrderStatusCountProjection {
+        OrderStatus getStatus();
+        long getCnt();
+    }
+
 }

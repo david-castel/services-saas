@@ -2,11 +2,9 @@ package com.davidcastel.services_saas.web.controller;
 
 import com.davidcastel.services_saas.domain.OrderStatus;
 import com.davidcastel.services_saas.service.CustomerService;
+import com.davidcastel.services_saas.service.CustomerWorkOrderSummaryService;
 import com.davidcastel.services_saas.service.WorkOrderService;
-import com.davidcastel.services_saas.web.dto.CreateCustomerRequest;
-import com.davidcastel.services_saas.web.dto.CustomerResponse;
-import com.davidcastel.services_saas.web.dto.UpdateCustomerRequest;
-import com.davidcastel.services_saas.web.dto.WorkOrderListItemResponse;
+import com.davidcastel.services_saas.web.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +20,14 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final WorkOrderService workOrderService;
+    private final CustomerWorkOrderSummaryService summaryService;
 
-    public CustomerController(CustomerService customerService, WorkOrderService workOrderService) {
+    public CustomerController(CustomerService customerService,
+                              WorkOrderService workOrderService,
+                              CustomerWorkOrderSummaryService summaryService) {
         this.customerService = customerService;
         this.workOrderService = workOrderService;
+        this.summaryService = summaryService;
     }
 
     @PostMapping
@@ -63,6 +65,11 @@ public class CustomerController {
             @PageableDefault(size = 20) Pageable pageable
     ) {
         return workOrderService.listItems(status, customerId, pageable);
+    }
+
+    @GetMapping("/{id}/work-orders/summary")
+    public CustomerWorkOrderSummaryResponse getWorkOrdersSummary(@PathVariable("id") Long id) {
+        return summaryService.getSummary(id);
     }
 
 }
