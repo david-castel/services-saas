@@ -38,7 +38,7 @@ public class CustomerWorkOrderSummaryService {
         // Obtenemos la suma de todos los WorkOrder existentes:
         long total = byStatus.stream().mapToLong(WorkOrderStatusCount::count).sum();
 
-        // (Opcional senior) garantizar que salgan todos los estados, incluso con 0:
+        // Garantizar que salgan todos los estados, incluso con 0:
          byStatus = fillMissingStatuses(byStatus);
 
         return new CustomerWorkOrderSummaryResponse(customerId, total, byStatus);
