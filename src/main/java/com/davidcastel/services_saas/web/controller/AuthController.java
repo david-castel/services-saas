@@ -24,6 +24,12 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Recibe usuario y contraseña, valida credenciales y devuelve el JWT.
+     *
+     * @param request
+     * @return
+     */
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
 
@@ -38,6 +44,8 @@ public class AuthController {
 //
 //        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
 
+        // Autenticamos el usuario y contraseña con el AuthenticationManager:
+        // Qué pasa si no coincide? Lanza AuthenticationException (teóricamente devuelve un 401)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
@@ -48,6 +56,7 @@ public class AuthController {
         String username = authentication.getName();
         String token = jwtService.generateToken(username);
 
+        // Devolvemos el token JWT generado:
         return new LoginResponse(token);
     }
 }

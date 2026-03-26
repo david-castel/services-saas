@@ -49,4 +49,6 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
         long getCnt();
     }
 
+    boolean existsByCustomerId(Long customerId);
+
 }

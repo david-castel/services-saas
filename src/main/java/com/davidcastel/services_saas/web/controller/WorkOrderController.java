@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class WorkOrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public Page<WorkOrderListItemResponse> listItems(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) Long customerId,
@@ -38,24 +40,28 @@ public class WorkOrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public WorkOrderResponse create(@Valid @RequestBody CreateWorkOrderRequest workOrderRequest) {
         return workOrderService.create(workOrderRequest);
     }
 
     @PatchMapping("/{id}/start")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void start(@PathVariable Long id) {
         workOrderService.start(id);
     }
 
     @PatchMapping("/{id}/complete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void complete(@PathVariable Long id) {
         workOrderService.complete(id);
     }
 
     @PatchMapping("/{id}/cancel")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void cancel(@PathVariable Long id) {
         workOrderService.cancel(id);
     }

@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Esta clase implementa la interfaz UserDetailsService de Spring Security.
+ * Se encarga de cargar los datos del usuario desde la base de datos cuando se necesita autenticar.
+ * Es usada por AuthenticationManager para validar las credenciales del usuario.
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 

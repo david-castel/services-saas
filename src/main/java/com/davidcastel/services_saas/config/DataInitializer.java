@@ -26,16 +26,20 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        String adminEmail = "admin@test.com";
-
-        if (!userRepository.existsByEmail(adminEmail)) {
-            User admin = new User(
-                    adminEmail,
+        if (!userRepository.existsByEmail("admin@test.com")) {
+            userRepository.save(new User(
+                    "admin@test.com",
                     passwordEncoder.encode("admin123"),
                     Role.ADMIN
-            );
+            ));
+        }
 
-            userRepository.save(admin);
+        if (!userRepository.existsByEmail("user@test.com")) {
+            userRepository.save(new User(
+                    "user@test.com",
+                    passwordEncoder.encode("user123"),
+                    Role.USER
+            ));
         }
     }
 }

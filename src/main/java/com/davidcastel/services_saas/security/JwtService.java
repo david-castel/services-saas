@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+/**
+ * Servicio para generar y validar tokens JWT.
+ */
 @Service
 public class JwtService {
 
@@ -36,7 +39,7 @@ public class JwtService {
                 .subject(username)
                 .issuedAt(new Date(now))
                 .expiration(new Date(expiration))
-                .signWith(getSigningKey())
+                .signWith(getSigningKey())  // Firma el token con nuestra clave secreta (Eso evita que alguien pueda modificarlo sin que se detecte).
                 .compact();
     }
 
@@ -63,9 +66,10 @@ public class JwtService {
     // En JJWT 0.12.x se usa parser().verifyWith(key).build().parseSignedClaims(...)
     public Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(getSigningKey())    // verifica la firma del token con la misma clave. Si alguien lo ha manipulado, fallará.
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
 }

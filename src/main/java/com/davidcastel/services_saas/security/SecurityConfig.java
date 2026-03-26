@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,7 +14,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de seguridad para la aplicación.
+ * Aquí se definen las siguientes reglas globales de seguridad:
+ *  - Qué rutas son públicas
+ *  - Qué rutas requieren autenticación
+ *  - Que no haya sesión
+ *  - Que se use nuestro filtro JWT
+ *
+ *  Intercepta la request (cada petición) antes de llegar al controller.
+ */
 @Configuration
+@EnableMethodSecurity
+/**
+ * @EnableMethodSecurity:
+ *  Permite usar anotaciones como:
+ *      @PreAuthorize("hasRole('ADMIN')")
+ * en controllers o services.
+ */
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -32,7 +50,13 @@ public class SecurityConfig {
                 + jwtAuthenticationFilter.getClass().getName());
 
         http
-                // En APIs REST con JWT solemos desactivar CSRF
+                // En APIs REST con JWT solemos desactivar CSRF:
+                // CSRF protege aplicaciones con sesión y cookies.
+                // Una API REST con JWT, donde:
+                //  - no hay sesión
+                //  - no hay cookies
+                //  - cada request lleva token
+                // Por eso se desactiva.
                 .csrf(csrf -> csrf.disable())
 
                 // No queremos sesión: cada request debe venir con su token.
@@ -43,7 +67,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // Reglas de autorización
+                // Reglas de autorización:
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
@@ -58,6 +82,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+                // Manejo de excepciones:
+                //
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -93,6 +119,7 @@ public class SecurityConfig {
     /**
      * AuthenticationManager:
      *      Es el punto de entrada de autenticación de Spring.
+     *      Es el motor que autentica usuarios.
      * Cuando tú llames a:
      *      authenticationManager.authenticate(...)
      *

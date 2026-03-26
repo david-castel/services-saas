@@ -2,6 +2,7 @@ package com.davidcastel.services_saas.service;
 
 import com.davidcastel.services_saas.domain.Customer;
 import com.davidcastel.services_saas.domain.OrderStatus;
+import com.davidcastel.services_saas.domain.exception.CustomerDeletionConflictException;
 import com.davidcastel.services_saas.domain.exception.DuplicateEmailException;
 import com.davidcastel.services_saas.domain.exception.ResourceNotFoundException;
 import com.davidcastel.services_saas.repository.CustomerRepository;
@@ -25,9 +26,11 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final WorkOrderService workOrderService;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, WorkOrderService workOrderService) {
         this.customerRepository = customerRepository;
+        this.workOrderService = workOrderService;
     }
 
     public CustomerResponse create(CreateCustomerRequest customerRequest) {
@@ -90,7 +93,23 @@ public class CustomerService {
             throw new ResourceNotFoundException("Customer not found: " + id);
         }
 
+//        if (workOrderService.existsByCustomerId(id)) {
+//            throw new IllegalStateException("Cannot delete customer with existing work orders");
+//        }
+
+        if (workOrderService.existsByCustomerId(id)) {
+            throw new CustomerDeletionConflictException(
+                    "Cannot delete customer because it has associated work orders"
+            );
+        }
+
         customerRepository.deleteById(id);
+
+//        Customer customer = customerRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+//
+//        customerRepository.delete(customer);
+
     }
 
 

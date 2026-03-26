@@ -98,6 +98,11 @@ public class WorkOrderService {
         wo.cancel();
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByCustomerId(Long customerId) {
+        return workOrderRepository.existsByCustomerId(customerId);
+    }
+
     private WorkOrderListItemResponse toListItem(WorkOrder wo) {
         return new WorkOrderListItemResponse(
                 wo.getId(),
@@ -107,5 +112,7 @@ public class WorkOrderService {
                 wo.getCustomer().getName()
         );
     }
+
+
 
 }

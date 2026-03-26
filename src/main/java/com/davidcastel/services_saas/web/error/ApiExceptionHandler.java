@@ -1,5 +1,6 @@
 package com.davidcastel.services_saas.web.error;
 
+import com.davidcastel.services_saas.domain.exception.CustomerDeletionConflictException;
 import com.davidcastel.services_saas.domain.exception.DuplicateEmailException;
 import com.davidcastel.services_saas.domain.exception.InvalidWorkOrderStateException;
 import com.davidcastel.services_saas.domain.exception.ResourceNotFoundException;
@@ -149,6 +150,25 @@ public class ApiExceptionHandler {
             pd.setProperty("allowedValues", allowed);
         }
 
+        return pd;
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ProblemDetail handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        pd.setTitle("Conflict");
+        pd.setDetail(ex.getMessage());
+        pd.setInstance(URI.create(request.getRequestURI()));
+        return pd;
+    }
+
+    @ExceptionHandler(CustomerDeletionConflictException.class)
+    public ProblemDetail handleCustomerDeletionConflict(CustomerDeletionConflictException ex,
+                                                        HttpServletRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        pd.setTitle("Conflict");
+        pd.setDetail(ex.getMessage());
+        pd.setInstance(URI.create(request.getRequestURI()));
         return pd;
     }
 

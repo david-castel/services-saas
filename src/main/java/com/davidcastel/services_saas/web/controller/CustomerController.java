@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,33 +33,39 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public CustomerResponse create(@Valid @RequestBody CreateCustomerRequest req) {
         return customerService.create(req);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public CustomerResponse getById(@PathVariable Long id) {
         return customerService.getById(id);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public List<CustomerResponse> list() {
         return customerService.getAll();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public CustomerResponse update(@PathVariable Long id, @Valid @RequestBody UpdateCustomerRequest customerRequest) {
         return customerService.update(id, customerRequest);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable Long id) {
         customerService.delete(id);
     }
 
     @GetMapping("/{id}/work-orders")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public Page<WorkOrderListItemResponse> listWorkOrdersByCustomer(
             @PathVariable("id") Long customerId,
             @RequestParam(required = false) OrderStatus status,
@@ -68,6 +75,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/work-orders/summary")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public CustomerWorkOrderSummaryResponse getWorkOrdersSummary(@PathVariable("id") Long id) {
         return summaryService.getSummary(id);
     }
